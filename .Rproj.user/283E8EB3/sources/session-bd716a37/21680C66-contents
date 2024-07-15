@@ -1,0 +1,57 @@
+fashion_mnist <- dataset_fashion_mnist()
+c(train_images,train_labels) %<-% fashion_mnist$train
+c(test_images,test_labels) %<-% fashion_mnist$test
+class_names = c('T-shirt/top',
+                'Trouser',
+                'Pullover',
+                'Dress',
+                'Coat',
+                'Sandal',
+                'Shirt',
+                'Sneaker',
+                'Bag',
+                'Ankle boot')
+train_images <- train_images/255
+test_images <- test_images/255
+
+val_indices <- 1:5000
+val_images <- train_images[val_indices,,]
+part_train_images <- train_images[-val_indices,,]
+val_labels <- train_labels[val_indices]
+part_train_labels <- train_labels[5001:60000]
+
+str(part_train_images)
+part_train_images <- array_reshape(part_train_images, c(55000,28,28,1))
+val_images <- array_reshape(val_images,c(5000,28,28,1))
+test_images <- array_reshape(test_images,c(10000,28,28,1))
+model <- keras_model_sequential() %>% 
+  layer_conv_2d(filters = 32, kernel_size = c(3,3), activation = "relu", input_shape = c(28,28,1))%>%
+  layer_max_pooling_2d(pool_size = c(2,2))
+model <- model %>%
+  layer_flatten() %>%
+  layer_dense(units = 300, activation = "relu") %>%
+  layer_dense(units = 100, activation = "relu") %>%
+  layer_dense(units = 10, activation = "softmax")
+model %>% compile(
+  optimizer = 'sgd',
+  loss = 'sparse_categorical_crossentropy',
+  metrics = c('accuracy')
+)
+model %>% fit(part_train_images, part_train_labels, epochs = 30, batch_size = 64, validation_data = list(val_images,val_labels)) 
+CNN_score <- model %>% evaluate(test_images, test_labels)
+cat('Test loss:', CNN_score$loss, "\n")
+cat('Test accuracy:', CNN_score$acc,"\n")
+
+class_pred <- predict(model, test_images) %>% argmax(axis = 2)
+class_pred <- predict(model, test_images) %>% dplyr::argmax(axis = 2)
+class_pred <- model %>% predict_classes(test_images)
+probabilities <- model %>% predict(test_images)
+class_pred <- apply(probabilities, 1, which.max) - 1
+class_pred[1:20]
+class_names[class_pred[1:20]+1]
+class_names[test_labels[1:20]+1]
+plot(as.raster(test_images[13, , , ]), max = 255)
+
+
+
+
