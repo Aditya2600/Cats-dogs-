@@ -24,4 +24,4 @@ The goal of this project is to accurately classify images of cats and dogs. The 
 * **CNN Model:** Achieved a validation accuracy of 79.57% using a custom CNN architecture.
 * **VGG16 Model:** Improved validation accuracy to 98.30% by fine-tuning the VGG16 pre-trained model.
   
-![Alt text](images/[graph cats vs dogs.jpg](https://github.com/Aditya2600/Cats-dogs-/blob/master/graph%20cats%20vs%20dogs.png))
+
